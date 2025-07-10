@@ -1,0 +1,26 @@
+# Ignorar el entorno virtual
+venv/
+
+# Ignorar otros archivos comunes en Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignorar archivos de configuración de IDEs
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.vscode/
+*.code-workspace
+*.iml
+*.swp
+*.swo
+*.DS_Store
+*.egg-info/
+*.egg
+*.log
+*.pot
+
+# Ignorar archivos de configuración de entornos
+.env
