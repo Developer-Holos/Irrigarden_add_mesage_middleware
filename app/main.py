@@ -1,6 +1,6 @@
 import os
 from fastapi import FastAPI, Request, Form
-from app.message_handler import process_request_data, parse_nested_form
+from app.message_handler import parse_nested_form
 
 app = FastAPI()
 
