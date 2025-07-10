@@ -1,4 +1,5 @@
 import os
+import uvicorn
 from fastapi import FastAPI, Request, Form
 from app.message_handler import parse_nested_form, process_request_data
 
@@ -21,5 +22,4 @@ async def webhook(request: Request):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
-    import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=port)
