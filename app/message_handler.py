@@ -3,7 +3,7 @@ import aiofiles #Permite leer y escribir archivos de forma asíncrona.
 import aiohttp #Permite realizar solicitudes HTTP de forma asíncrona.
 import requests #Permite realizar solicitudes HTTP de forma sincrónica.
 from dotenv import load_dotenv #Carga las variables de entorno desde un archivo .env
-load_dotenv()
+# load_dotenv()
 
 
 async def download_audio_file(url: str, path: str):

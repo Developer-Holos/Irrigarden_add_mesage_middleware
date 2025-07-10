@@ -1,8 +1,6 @@
 import os
 from fastapi import FastAPI, Request, Form
-from app.redis_client import store_message_in_redis, get_messages_for_lead, delete_messages_for_lead, set_lead_timer, lead_timer_exists, check_expired_leads
 from app.message_handler import process_request_data, parse_nested_form
-import asyncio
 
 app = FastAPI()
 
