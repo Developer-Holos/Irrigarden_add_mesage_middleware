@@ -1,15 +1,14 @@
-import os  # Accede a variables de entorno y funciones del sistema operativo
-import aiofiles  # Permite leer y escribir archivos de forma asíncrona
-import aiohttp  # Permite realizar solicitudes HTTP de forma asíncrona
-import cv2
-import numpy as np
-import pytesseract
+import os
+import aiofiles
+import aiohttp
+import base64
+import requests
 from fastapi import FastAPI, Request
-from dotenv import load_dotenv  # Carga las variables de entorno desde un .env
+from dotenv import load_dotenv
 
-load_dotenv()  # Si usas .env para tus claves
+load_dotenv()
 
-# 1) Función genérica de descarga
+# 1) Descargar archivos desde URL
 async def download_file(url: str, path: str):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
@@ -18,44 +17,44 @@ async def download_file(url: str, path: str):
                 await f.write(await resp.read())
     return path
 
-# 2) OCR robusto para capturas/tablas
-def ocr_from_image(path: str) -> str:
-    img = cv2.imread(path)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = cv2.bilateralFilter(gray, 9, 75, 75)
-    thresh = cv2.adaptiveThreshold(
-        gray, 255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY,
-        11, 2
-    )
+# 2) Enviar imagen a OpenAI GPT-4o con visión
+def analyze_image_with_gpt4o(image_path: str, prompt: str = "Extrae la información en formato JSON con los campos 'producto' y 'cantidad'."):
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY no está definida")
 
-    data = pytesseract.image_to_data(
-        thresh,
-        lang="spa+eng",
-        config="--psm 6",
-        output_type=pytesseract.Output.DICT
-    )
+    with open(image_path, "rb") as image_file:
+        encoded_image = base64.b64encode(image_file.read()).decode("utf-8")
 
-    from collections import defaultdict
-    rows = defaultdict(list)
-    for i, txt in enumerate(data["text"]):
-        txt = txt.strip()
-        if not txt:
-            continue
-        line = data["line_num"][i]
-        x = data["left"][i]
-        rows[line].append((x, txt))
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
 
-    lines = []
-    for ln in sorted(rows):
-        words = sorted(rows[ln], key=lambda w: w[0])
-        line_text = " ".join(w for _, w in words)
-        lines.append(line_text)
+    payload = {
+        "model": "gpt-4o",
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/png;base64,{encoded_image}"
+                        }
+                    }
+                ]
+            }
+        ],
+        "max_tokens": 1000
+    }
 
-    return "\n".join(lines)
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+    response.raise_for_status()
+    return response.json()["choices"][0]["message"]["content"]
 
-# 3) Tu función principal de negocio, ahora sin audio/CSV
+# 3) Procesar los datos del mensaje recibido
 async def process_request_data(form_data: dict):
     msg = form_data["message"]["add"][0]
     lead_id = int(msg["entity_id"])
@@ -69,20 +68,23 @@ async def process_request_data(form_data: dict):
         filename = att["file_name"]
         temp_path = f"/tmp/{filename}"
 
-        # descarga + OCR
+        # Descargar imagen y procesarla con GPT-4o
         await download_file(url, temp_path)
-        ocr_text = ocr_from_image(temp_path)
-        os.remove(temp_path)
-
-        result_text += f"\n[OCR de imagen:]\n{ocr_text}"
+        try:
+            vision_summary = analyze_image_with_gpt4o(temp_path)
+            result_text += f"\n[Resumen IA de imagen:]\n{vision_summary}"
+        except Exception as e:
+            result_text += f"\n[Error al procesar imagen con IA: {e}]"
+        finally:
+            os.remove(temp_path)
 
     return {"lead_id": lead_id, "text": result_text}
 
+# 4) Parseo de formularios anidados tipo Kommo
 def parse_nested_form(form):
     result = {}
 
     for key, value in form.items():
-        # Ej: message[add][0][text] → ['message', 'add', '0', 'text']
         keys = key.replace("]", "").split("[")
 
         d = result
