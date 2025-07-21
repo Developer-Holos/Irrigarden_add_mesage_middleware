@@ -2,7 +2,7 @@ import os
 import uvicorn
 from fastapi import FastAPI, Request, Form
 from app.message_handler import parse_nested_form, process_request_data
-from app.kommo_service import validate_stage_kommo
+from app.kommo_service.validate_stage_kommo import validate_stage_kommo
 
 app = FastAPI()
 
