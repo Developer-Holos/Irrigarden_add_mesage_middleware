@@ -17,8 +17,8 @@ def validate_stage_kommo(lead_id):
 
     url = f"https://{subdomain}.kommo.com/v4/leads/{lead_id}"
     headers = {
-        "Authorization": f"Bearer {token}",
-        "Content-Type": "application/json"
+        "accept": "application/json",
+        "Authorization": f"Bearer {token}"
     }
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
