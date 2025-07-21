@@ -15,7 +15,7 @@ def validate_stage_kommo(lead_id):
     if not token or not subdomain:
         raise ValueError("TOKEN_KOMMO o SUBDOMAIN_KOMMO no está definida")
 
-    url = f"https://{subdomain}.kommo.com/v4/leads/{lead_id}"
+    url = f"https://{subdomain}.kommo.com/api/v4/leads/{lead_id}"
     headers = {
         "accept": "application/json",
         "Authorization": f"Bearer {token}"
