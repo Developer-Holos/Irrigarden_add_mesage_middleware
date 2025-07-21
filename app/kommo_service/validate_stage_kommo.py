@@ -20,8 +20,12 @@ def validate_stage_kommo(lead_id):
         "accept": "application/json",
         "Authorization": f"Bearer {token}"
     }
+    print(f"Validando lead {lead_id} en Kommo...")
+    print(f"URL consultada: {url}")
     response = requests.get(url, headers=headers)
+    print(f"Respuesta: {response.text[:200]}")  # Solo los primeros 200 caracteres
     if response.status_code != 200:
+        print(f"Status code: {response.status_code}")
         raise Exception(f"Error al obtener el lead: {response.text}")
 
     try:
