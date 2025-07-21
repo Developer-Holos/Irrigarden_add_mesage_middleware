@@ -36,4 +36,4 @@ def validate_stage_kommo(lead_id):
 
     status_id = data.get("status_id")
     pipeline_id = data.get("pipeline_id")
-    return status_id == 58141807 and pipeline_id == 6950551
+    return status_id == 66955747 and pipeline_id == 8472895
