@@ -23,6 +23,7 @@ def validate_stage_kommo(lead_id):
         }
         response = requests.get(url, headers=headers)
         data = response.json()
+        print(f"Datos del lead: {data}")
         if response.status_code != 200:
             raise Exception(f"Error al obtener el lead: {data.get('error', 'Unknown error')}")
         
