@@ -30,38 +30,39 @@ def add_message(lead_id: int, text: str):
             return {"status": "error", "message": f"Error obteniendo lead: {response.status_code} - {response.text}"}
 
         data = response.json()
-        custom_fields_values = data.get("custom_fields_values", [])
+        custom_fields_values = data.get("custom_fields_values")
         print(f"Campos actuales: {custom_fields_values}")
 
-        # Buscamos el campo personalizado
-        field_found = False
-        new_value = ""
-        
-        for field in custom_fields_values:
-            if field.get("field_id") == 2959478:
-                field_found = True
-                print("Campo encontrado, actualizando valor")
-                if field.get("values") and len(field["values"]) > 0:
-                    new_value = field["values"][0]["value"] + "\n" + text
-                else:
-                    new_value = text
-                break
-
-        # Preparamos solo el campo que queremos actualizar
-        if field_found:
-            print(f"Actualizando campo existente con valor: {new_value}")
-            custom_field_update = [{
-                "field_id": 2959478,
-                "values": [{"value": new_value}]
-            }]
-        else:
-            print(f"Creando nuevo campo con valor: {text}")
+        # Escenario 1: custom_fields_values es None
+        if custom_fields_values is None:
+            print("No hay campos personalizados, creando nuevo campo")
             custom_field_update = [{
                 "field_id": 2959478,
                 "values": [{"value": text}]
             }]
+        else:
+            # Escenario 2: Buscar si existe el campo específico
+            field_found = False
+            for field in custom_fields_values:
+                if field.get("field_id") == 2959478:
+                    field_found = True
+                    print("Campo encontrado, actualizando valor existente")
+                    current_value = field.get("values", [{}])[0].get("value", "")
+                    custom_field_update = [{
+                        "field_id": 2959478,
+                        "values": [{"value": f"{current_value}\n{text}" if current_value else text}]
+                    }]
+                    break
+            
+            # Escenario 3: No se encontró el campo específico
+            if not field_found:
+                print("Campo no encontrado, creando nuevo campo")
+                custom_field_update = [{
+                    "field_id": 2959478,
+                    "values": [{"value": text}]
+                }]
 
-        # Actualizamos solo el campo específico
+        # Actualizamos el campo
         payload = {"custom_fields_values": custom_field_update}
         print(f"Payload del PATCH: {payload}")
         
