@@ -26,6 +26,10 @@ async def webhook(request: Request):
         processed = await process_request_data(data)
         
         add_message_result = add_message(processed["lead_id"], processed["text"])
+        if add_message_result["status"] == "error":
+            return add_message_result
+        else:
+            print(f"Mensaje agregado: {processed['text']}")
 
         print(f"Mensaje agregado correctamente al lead {lead_id}")
 
