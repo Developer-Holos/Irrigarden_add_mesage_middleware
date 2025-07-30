@@ -3,7 +3,9 @@ import requests
 
 def add_message(lead_id: int, text: str):
     print(f"Iniciando add_message para lead_id: {lead_id}")
-    
+
+
+    msj_client_field_id = 2978841  # ID del campo personalizado para mensajes del cliente
     token = os.getenv("TOKEN_KOMMO")
     subdomain = os.getenv("SUBDOMAIN_KOMMO")
 
@@ -37,19 +39,19 @@ def add_message(lead_id: int, text: str):
         if custom_fields_values is None:
             print("No hay campos personalizados, creando nuevo campo")
             custom_field_update = [{
-                "field_id": 2959478,
+                "field_id": msj_client_field_id,
                 "values": [{"value": text}]
             }]
         else:
             # Escenario 2: Buscar si existe el campo específico
             field_found = False
             for field in custom_fields_values:
-                if field.get("field_id") == 2959478:
+                if field.get("field_id") == msj_client_field_id:
                     field_found = True
                     print("Campo encontrado, actualizando valor existente")
                     current_value = field.get("values", [{}])[0].get("value", "")
                     custom_field_update = [{
-                        "field_id": 2959478,
+                        "field_id": msj_client_field_id,
                         "values": [{"value": f"{current_value}\n{text}" if current_value else text}]
                     }]
                     break
@@ -58,7 +60,7 @@ def add_message(lead_id: int, text: str):
             if not field_found:
                 print("Campo no encontrado, creando nuevo campo")
                 custom_field_update = [{
-                    "field_id": 2959478,
+                    "field_id": msj_client_field_id,
                     "values": [{"value": text}]
                 }]
 
