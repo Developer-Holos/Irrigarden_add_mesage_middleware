@@ -20,20 +20,16 @@ def validate_stage_kommo(lead_id):
         "accept": "application/json",
         "Authorization": f"Bearer {token}"
     }
-    print(f"Validando lead {lead_id} en Kommo...")
-    print(f"URL consultada: {url}")
+
     response = requests.get(url, headers=headers)
-    print(f"Respuesta: {response.text[:200]}")  # Solo los primeros 200 caracteres
     if response.status_code != 200:
-        print(f"Status code: {response.status_code}")
         raise Exception(f"Error al obtener el lead: {response.text}")
 
     try:
         data = response.json()
     except Exception as e:
-        print(f"Respuesta no es JSON: {response.text}")
         raise Exception("Respuesta de Kommo no es JSON válida")
 
     status_id = data.get("status_id")
     pipeline_id = data.get("pipeline_id")
-    return status_id == 66955747 and pipeline_id == 8472895
+    return status_id == 89221147 and pipeline_id == 8472895
