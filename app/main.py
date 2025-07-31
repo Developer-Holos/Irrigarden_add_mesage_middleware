@@ -13,9 +13,9 @@ async def webhook(request: Request):
     try:
         form = await request.form()
         data = parse_nested_form(form)
-        print(f"🚀🚀🚀🚀🚀🚀form recibidos🚀🚀🚀🚀🚀🚀")
-        print(form)
-        print(f"🚀🚀🚀🚀🚀🚀Fin de los form recibidos🚀🚀🚀🚀🚀🚀")
+        print(f"🚀🚀🚀🚀🚀🚀request🚀🚀🚀🚀🚀🚀")
+        print(request)
+        print(f"🚀🚀🚀🚀🚀🚀Fin request🚀🚀🚀🚀🚀🚀")
         msg = data["message"]["add"][0]
         lead_id = int(msg["entity_id"])
 
