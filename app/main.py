@@ -12,29 +12,25 @@ app = FastAPI()
 @app.post("/add_message")
 async def webhook(request: Request):
     try:
+        # Validar el user-agent
+        user_agent = request.headers.get("user-agent")
+        if user_agent != "amoCRM-Webhooks/3.0":
+            print(f"User-Agent no válido: {user_agent}")
+            return {
+                "status": "error",
+                "message": "Este webhook solo acepta peticiones de amoCRM-Webhooks/3.0"
+            }
+
         form = await request.form()
         data = parse_nested_form(form)
 
         # Imprimir detalles completos del request
         print("\n🚀 DETALLES COMPLETOS DEL REQUEST 🚀")
-        
-        # Método y URL
-        print("\n📡 Básicos:")
-        print(f"Method: {request.method}")
-        print(f"URL: {request.url}")
-        print(f"Base URL: {request.base_url}")
-        print(f"Path: {request.url.path}")
-        print(f"Query Params: {dict(request.query_params)}")
 
         # Headers
         print("\n📋 Headers:")
         for name, value in request.headers.items():
             print(f"{name}: {value}")
-
-        # Cookies
-        print("\n🍪 Cookies:")
-        for key, value in request.cookies.items():
-            print(f"{key}: {value}")
 
         # Client
         print("\n🌐 Client Info:")
